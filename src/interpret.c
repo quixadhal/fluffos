@@ -4178,14 +4178,13 @@ int apply_low (const char * fun, object_t * ob, int num_arg)
       funflags = entry->oprogp->function_flags[runtime_index];
 
       // ORIGIN_DRIVER can access anything
-      // ORIGIN_INTERNAL can access PRIVATE iff ob == curent_object, otherwise PROTECTED
-      // other can only access PUBLIC
+      // ORIGIN_INTERNAL can access PRIVATE
       switch (local_call_origin) {
         case ORIGIN_DRIVER:
           need = DECL_HIDDEN;
           break;
         case ORIGIN_INTERNAL:
-          need = (ob == current_object ? DECL_PRIVATE: DECL_PROTECTED);
+          need = DECL_PROTECTED;
           break;
         default:
           need = (ob == current_object ? DECL_PROTECTED: DECL_PUBLIC);
@@ -4282,14 +4281,13 @@ int apply_low (const char * fun, object_t * ob, int num_arg)
       int funflags = ob->prog->function_flags[runtime_index];
 
       // ORIGIN_DRIVER can access anything
-      // ORIGIN_INTERNAL can access PRIVATE iff ob == curent_object, otherwise PROTECTED
-      // other can only access PUBLIC
+      // ORIGIN_INTERNAL can access PRIVATE
       switch (local_call_origin) {
         case ORIGIN_DRIVER:
           need = DECL_HIDDEN;
           break;
         case ORIGIN_INTERNAL:
-          need = (ob == current_object ? DECL_PRIVATE: DECL_PROTECTED);
+          need = DECL_PROTECTED;
           break;
         default:
           need = (ob == current_object ? DECL_PROTECTED: DECL_PUBLIC);

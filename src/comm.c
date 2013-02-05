@@ -188,6 +188,11 @@ int has_console = -1;
  */
 static int addr_server_fd = -1;
 
+#ifdef IPV6
+/* temporal variable to hold ipv6 address inet_ntop result. */
+static char ipv6addr[INET6_ADDRSTRLEN];
+#endif
+
 static
 void set_linemode (interactive_t * ip)
 {
@@ -1966,8 +1971,8 @@ static void new_user_handler (int which)
 
     memcpy((char *) &all_users[i]->addr, (char *) &addr, length);
 #ifdef IPV6
-    char tmp[INET6_ADDRSTRLEN];
-    debug(connections, ("New connection from %s.\n", inet_ntop(AF_INET6, &addr.sin6_addr, &tmp, INET6_ADDRSTRLEN)));
+    debug(connections, ("New connection from %s.\n",
+      inet_ntop(AF_INET6, &addr.sin6_addr, ipv6addr, INET6_ADDRSTRLEN)));
 #else
     debug(connections, ("New connection from %s.\n", inet_ntoa(addr.sin_addr)));
 #endif
@@ -1992,7 +1997,8 @@ static void new_user_handler (int which)
         else
             free_object(&master, "new_user");
 #ifdef IPV6
-        debug_message("Connection from %s aborted.\n", inet_ntop(AF_INET6, &addr.sin6_addr, tmp, INET6_ADDRSTRLEN));
+        debug_message("Connection from %s aborted.\n",
+          inet_ntop(AF_INET6, &addr.sin6_addr, ipv6addr, INET6_ADDRSTRLEN));
 #else
         debug_message("Connection from %s aborted.\n", inet_ntoa(addr.sin_addr));
 #endif
@@ -2352,9 +2358,14 @@ void remove_interactive (object_t * ob, int dested)
             debug_message("Double call to remove_interactive()\n");
         return;
     }
-
+#ifdef IPV6
+    debug(connections, ("Closing connection from %s.\n", 
+        inet_ntop(AF_INET6, &(ip->addr.sin6_addr), ipv6addr,
+                  INET6_ADDRSTRLEN)));
+#else
     debug(connections, ("Closing connection from %s.\n",
                         inet_ntoa(ip->addr.sin_addr)));
+#endif
 
     flush_message(ip);
     ip->iflags |= CLOSING;
@@ -2892,10 +2903,6 @@ void mark_iptable() {
         if (iptable[i].name)
             EXTRA_REF(BLOCK(iptable[i].name))++;
 }
-#endif
-
-#ifdef IPV6
-char ipv6addr[INET6_ADDRSTRLEN];
 #endif
 
 char *query_ip_name (object_t * ob)
