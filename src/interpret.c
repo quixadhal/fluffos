@@ -4177,7 +4177,20 @@ int apply_low (const char * fun, object_t * ob, int num_arg)
       runtime_index = findex + entry->progp->last_inherited + entry->function_index_offset;
       funflags = entry->oprogp->function_flags[runtime_index];
 
-      need = (local_call_origin == ORIGIN_DRIVER ? DECL_HIDDEN : ((current_object == ob || local_call_origin == ORIGIN_INTERNAL) ? DECL_PROTECTED : DECL_PUBLIC));
+      // ORIGIN_DRIVER can access anything
+      // ORIGIN_INTERNAL can access PRIVATE iff ob == curent_object, otherwise PROTECTED
+      // other can only access PUBLIC
+      switch (local_call_origin) {
+        case ORIGIN_DRIVER:
+          need = DECL_HIDDEN;
+          break;
+        case ORIGIN_INTERNAL:
+          need = (ob == current_object ? DECL_PRIVATE: DECL_PROTECTED);
+          break;
+        default:
+          need = (ob == current_object ? DECL_PROTECTED: DECL_PUBLIC);
+          break;
+      }
 
       if ((funflags & DECL_ACCESS) >= need) {
         /*
@@ -4221,7 +4234,16 @@ int apply_low (const char * fun, object_t * ob, int num_arg)
         DEBUG_CHECK(save_csp - 1 != csp,
                     "Bad csp after execution in apply_low.\n");
         return 1;
+      } else {
+        error("function call access denied: \n"
+              "ob: %s, cob: %s, function: %s,  origin: %s, need: %s, perm: %s \n",
+            ob ? ob->obname : "null", 
+            current_object ? current_object->obname : "null", 
+            fun, origin_to_name(local_call_origin), 
+            access_to_name(need),
+            access_to_name(funflags & DECL_ACCESS));
       }
+
     } /* when we come here, the cache has told us
        * that the function isn't defined in the
        * object */
@@ -4259,7 +4281,20 @@ int apply_low (const char * fun, object_t * ob, int num_arg)
       function_t *funp = &prog->function_table[findex];
       int funflags = ob->prog->function_flags[runtime_index];
 
-      need = (local_call_origin == ORIGIN_DRIVER ? DECL_HIDDEN : ((current_object == ob || local_call_origin == ORIGIN_INTERNAL) ? DECL_PROTECTED : DECL_PUBLIC));
+      // ORIGIN_DRIVER can access anything
+      // ORIGIN_INTERNAL can access PRIVATE iff ob == curent_object, otherwise PROTECTED
+      // other can only access PUBLIC
+      switch (local_call_origin) {
+        case ORIGIN_DRIVER:
+          need = DECL_HIDDEN;
+          break;
+        case ORIGIN_INTERNAL:
+          need = (ob == current_object ? DECL_PRIVATE: DECL_PROTECTED);
+          break;
+        default:
+          need = (ob == current_object ? DECL_PROTECTED: DECL_PUBLIC);
+          break;
+      }
 
       if ((funflags & DECL_ACCESS) >= need) {
 
@@ -4321,6 +4356,14 @@ int apply_low (const char * fun, object_t * ob, int num_arg)
          * resulting value is always returned on the stack.
          */
         return 1;
+      } else {
+        error("function call access denied: \n"
+              "ob: %s, cob: %s, function: %s,  origin: %s, need: %s, perm: %s \n",
+            ob ? ob->obname : "null", 
+            current_object ? current_object->obname : "null", 
+            fun, origin_to_name(local_call_origin), 
+            access_to_name(need),
+            access_to_name(funflags & DECL_ACCESS));
       }
     }
 
@@ -5844,5 +5887,41 @@ void restore_context (error_context_t * econ) {
     } else
       refp = refp->next;
   }
+}
+
+INLINE const char* origin_to_name(const int origin) {
+  switch(origin) {
+    case ORIGIN_DRIVER:
+      return "driver";
+    case ORIGIN_LOCAL:
+      return "local";
+    case ORIGIN_CALL_OTHER:
+      return "call_other";
+    case ORIGIN_SIMUL_EFUN:
+      return "simul_efun";
+    case ORIGIN_INTERNAL:
+      return "internal";
+    case ORIGIN_EFUN:
+      return "efun";
+    case ORIGIN_FUNCTION_POINTER:
+      return "function_pointer";
+    case ORIGIN_FUNCTIONAL:
+      return "functional";
+  }
+  return "unknown";
+}
+
+INLINE const char* access_to_name(int mode) {
+  switch (mode) {
+    case DECL_HIDDEN:
+      return "hidden";
+    case DECL_PRIVATE:
+      return "private";
+    case DECL_PROTECTED:
+      return "protected";
+    case DECL_PUBLIC:
+      return "public";
+  }
+  return "unkown";
 }
 
