@@ -1,7 +1,10 @@
 Fluffos.
 
 To Build:
-cd src && ./build.FluffOs
-make
+cd src && ./build.FluffOs && make
 
 Issues are welcome.
+
+FluffOS 是Mudos的更新加强版 目前的feature包括 64位编译 UTF-8支持 IPV6 多种protocol, PCRE , Crypto等新的efun
+
+这个项目主要是解决 FluffOS和目前各类中文Mud的兼容性问题, 以及FluffOS自身的改进工作。欢迎你的bug report.
