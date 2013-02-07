@@ -4184,7 +4184,7 @@ int apply_low (const char * fun, object_t * ob, int num_arg)
           need = DECL_HIDDEN;
           break;
         case ORIGIN_INTERNAL:
-          need = DECL_PROTECTED;
+          need = DECL_PRIVATE;
           break;
         default:
           need = (ob == current_object ? DECL_PROTECTED: DECL_PUBLIC);
@@ -4287,7 +4287,7 @@ int apply_low (const char * fun, object_t * ob, int num_arg)
           need = DECL_HIDDEN;
           break;
         case ORIGIN_INTERNAL:
-          need = DECL_PROTECTED;
+          need = DECL_PRIVATE;
           break;
         default:
           need = (ob == current_object ? DECL_PROTECTED: DECL_PUBLIC);
