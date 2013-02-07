@@ -1235,7 +1235,7 @@ optimize_icode (char * start, char * pc, char * end) {
                 LOAD_SHORT(etable, pc);
                 pc += 2; /* def */
             	//break; //doesn't seem to work!
-                printf("stable: %x pc %x swstart %x etable %x\n", stable, pc, swstart, etable);
+                printf("stable: %x pc %p swstart %p etable %x\n", stable, (void *)pc, (void *)swstart, etable);
                 DEBUG_CHECK(stable < pc - swstart || etable < pc - swstart
                             || etable < stable,
                             "Error in switch table found while optimizing\n");

@@ -115,10 +115,12 @@ static unsigned char telnet_start_gmcp[] = {IAC, SB, TELOPT_GMCP};
 /*
  * local function prototypes.
  */
+#ifndef SIG_IGN
 #ifdef SIGNAL_FUNC_TAKES_INT
 static void sigpipe_handler (int);
 #else
-static void sigpipe_handler (void);
+static void sigpipe_handler(void);
+#endif
 #endif
 
 static void hname_handler (void);
@@ -187,6 +189,11 @@ int has_console = -1;
  * private local variables.
  */
 static int addr_server_fd = -1;
+
+#ifdef IPV6
+/* temporal variable to hold ipv6 address inet_ntop result. */
+static char ipv6addr[INET6_ADDRSTRLEN];
+#endif
 
 static
 void set_linemode (interactive_t * ip)
@@ -1026,7 +1033,7 @@ static void copy_chars (interactive_t * ip, char * from, int num_bytes)
                     	add_binary_message(ip->ob, telnet_start_mssp, sizeof(telnet_start_mssp));
                     	svalue_t *res = apply_master_ob(APPLY_GET_MUD_STATS, 0);
                     	mapping_t *map;
-                    	if(res <= 0 || res->type != T_MAPPING) {
+                    	if (res == 0 || res == (svalue_t *) -1 || res->type != T_MAPPING) {
                     		map = allocate_mapping(0);
                     		free_svalue(&apply_ret_value, "telnet neg");
                     		apply_ret_value.type = T_MAPPING;
@@ -1133,7 +1140,7 @@ static void copy_chars (interactive_t * ip, char * from, int num_bytes)
                 	ip->sb_size*=2;
                 	if(ip->sb_size > MAX_STRING_LENGTH)
                 		ip->sb_size = MAX_STRING_LENGTH;
-                	ip->sb_buf = (char *)REALLOC(ip->sb_buf, ip->sb_size);
+                	ip->sb_buf = (unsigned char *)REALLOC(ip->sb_buf, ip->sb_size);
                     if (ip->sb_pos < ip->sb_size - 1)
                         ip->sb_buf[ip->sb_pos++] = from[i];
                 }
@@ -1318,24 +1325,24 @@ static void copy_chars (interactive_t * ip, char * from, int num_bytes)
 
                             case TELOPT_TTYPE:
                                 if (!ip->sb_buf[1]) {
-                                    copy_and_push_string(ip->sb_buf + 2);
+                                    copy_and_push_string((const char *)(ip->sb_buf + 2));
                                     apply(APPLY_TERMINAL_TYPE, ip->ob, 1, ORIGIN_DRIVER);
                                 }
                                 break;
                             case TELOPT_ZMP:
                             {
                             	array_t *arr = allocate_array(max_array_size);
-                            	ip->sb_buf = (char *)REALLOC(ip->sb_buf, MAX(ip->sb_pos + 2, SB_SIZE));
+                            	ip->sb_buf = (unsigned char *)REALLOC(ip->sb_buf, MAX(ip->sb_pos + 2, SB_SIZE));
                             	ip->sb_size = MAX(ip->sb_pos + 2, SB_SIZE);
                             	ip->sb_buf[ip->sb_pos] = 0;
-                            	copy_and_push_string(ip->sb_buf+1);
+                            	copy_and_push_string((const char *)(ip->sb_buf+1));
                             	int off=0;
                             	int aro = 0;
                             	while(1){
-                            		off += strlen(ip->sb_buf+1+off)+2;
+                            		off += strlen((const char *)(ip->sb_buf+1+off))+2;
                             		if(off >= ip->sb_pos-1)
                             			break;
-                            		arr->item[aro].u.string = string_copy(&ip->sb_buf[off], "ZMP");
+                            		arr->item[aro].u.string = string_copy((const char *)(&ip->sb_buf[off]), "ZMP");
                             		arr->item[aro].type = T_STRING;
                             		arr->item[aro++].subtype = STRING_MALLOC;
                             	}
@@ -1347,13 +1354,13 @@ static void copy_chars (interactive_t * ip, char * from, int num_bytes)
 							break;
                             case TELOPT_GMCP:
                             	ip->sb_buf[ip->sb_pos] = 0;
-                            	copy_and_push_string(&ip->sb_buf[1]);
+                            	copy_and_push_string((const char *)(&ip->sb_buf[1]));
                             	apply(APPLY_GMCP, ip->ob, 1, ORIGIN_DRIVER);
                             	break;
                             default:
                                 for (x = 0;  x < ip->sb_pos;  x++)
                                     ip->sb_buf[x] = (ip->sb_buf[x] ? ip->sb_buf[x] : 'I');
-                                copy_and_push_string(ip->sb_buf);
+                                copy_and_push_string((const char *)(ip->sb_buf));
                                 apply(APPLY_TELNET_SUBOPTION, ip->ob, 1, ORIGIN_DRIVER);
                                 break;
                         }
@@ -1648,9 +1655,9 @@ static char *first_cmd_in_buf (interactive_t * ip)
  */
 #ifndef SIG_IGN
 #ifdef SIGNAL_FUNC_TAKES_INT
-void sigpipe_handler (int sig)
+static void sigpipe_handler (int sig)
 #else
-void sigpipe_handler()
+static void sigpipe_handler(void)
 #endif
 {
     debug(connections, ("SIGPIPE received."));
@@ -1906,7 +1913,7 @@ static void new_user_handler (int which)
     master_ob->interactive->default_err_message.s = 0;
 #endif
     master_ob->interactive->connection_type = external_port[which].kind;
-    master_ob->interactive->sb_buf = (char *)MALLOC(SB_SIZE);
+    master_ob->interactive->sb_buf = (unsigned char *)MALLOC(SB_SIZE);
     master_ob->interactive->sb_size = SB_SIZE;
     master_ob->flags |= O_ONCE_INTERACTIVE;
     /*
@@ -1966,8 +1973,8 @@ static void new_user_handler (int which)
 
     memcpy((char *) &all_users[i]->addr, (char *) &addr, length);
 #ifdef IPV6
-    char tmp[INET6_ADDRSTRLEN];
-    debug(connections, ("New connection from %s.\n", inet_ntop(AF_INET6, &addr.sin6_addr, &tmp, INET6_ADDRSTRLEN)));
+    debug(connections, ("New connection from %s.\n",
+      inet_ntop(AF_INET6, &addr.sin6_addr, ipv6addr, INET6_ADDRSTRLEN)));
 #else
     debug(connections, ("New connection from %s.\n", inet_ntoa(addr.sin_addr)));
 #endif
@@ -1992,7 +1999,8 @@ static void new_user_handler (int which)
         else
             free_object(&master, "new_user");
 #ifdef IPV6
-        debug_message("Connection from %s aborted.\n", inet_ntop(AF_INET6, &addr.sin6_addr, tmp, INET6_ADDRSTRLEN));
+        debug_message("Connection from %s aborted.\n",
+          inet_ntop(AF_INET6, &addr.sin6_addr, ipv6addr, INET6_ADDRSTRLEN));
 #else
         debug_message("Connection from %s aborted.\n", inet_ntoa(addr.sin_addr));
 #endif
@@ -2352,9 +2360,14 @@ void remove_interactive (object_t * ob, int dested)
             debug_message("Double call to remove_interactive()\n");
         return;
     }
-
+#ifdef IPV6
+    debug(connections, ("Closing connection from %s.\n", 
+        inet_ntop(AF_INET6, &(ip->addr.sin6_addr), ipv6addr,
+                  INET6_ADDRSTRLEN)));
+#else
     debug(connections, ("Closing connection from %s.\n",
                         inet_ntoa(ip->addr.sin_addr)));
+#endif
 
     flush_message(ip);
     ip->iflags |= CLOSING;
@@ -2892,10 +2905,6 @@ void mark_iptable() {
         if (iptable[i].name)
             EXTRA_REF(BLOCK(iptable[i].name))++;
 }
-#endif
-
-#ifdef IPV6
-char ipv6addr[INET6_ADDRSTRLEN];
 #endif
 
 char *query_ip_name (object_t * ob)

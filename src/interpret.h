@@ -388,4 +388,8 @@ void mark_svalue (svalue_t *);
 void mark_stack (void);
 #endif
 
+/* utility function */
+INLINE const char* origin_to_name(const int origin);
+INLINE const char* access_to_name(const int mode);
+
 #endif                          /* _INTERPRET_H */

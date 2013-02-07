@@ -259,7 +259,7 @@ static void yyerrorp (const char *);
 
 int lookup_predef(const char * name)
 {
-    int x;
+    unsigned int x;
 
     for(x = 0; x < (sizeof(predefs) / sizeof(keyword_t)); x++)
     {
@@ -445,7 +445,7 @@ include_error (const char * msg, int global)
 static void
 handle_include (char * name, int global)
 {
-    char *p, *nameptr;
+    char *p;
     static char buf[MAXLINE];
     incstate_t *is;
     int delim, f;
@@ -553,7 +553,7 @@ get_terminator (char * terminator)
 static int
 get_array_block (char * term)
 {
-    int termlen;                /* length of terminator */
+    unsigned int termlen;       /* length of terminator */
     char *array_line[NUMCHUNKS];/* allocate memory in chunks */
     int header, len;            /* header length; position in chunk */
     int startpos, startchunk;   /* start of line */
@@ -694,7 +694,7 @@ get_array_block (char * term)
 static int
 get_text_block (char * term)
 {
-    int termlen;                /* length of terminator */
+    unsigned int termlen;       /* length of terminator */
     char *text_line[NUMCHUNKS]; /* allocate memory in chunks */
     int len;                    /* position in chunk */
     int startpos, startchunk;   /* start of line */
@@ -2292,7 +2292,7 @@ static void int_add_instr_name (const char * name, int n, short t)
 
 static void init_instrs()
 {
-    int i, n;
+    unsigned int i, n;
 
     for (i = 0; i < BASE; i++) {
         instrs[i].ret_type = -1;
@@ -3456,7 +3456,7 @@ static void add_keyword_t (const char * name, keyword_t * entry) {
 }
 
 void init_identifiers() {
-    int i;
+    unsigned int i;
     ident_hash_elem_t *ihe;
 
     init_instrs();

@@ -1566,11 +1566,11 @@ static void handle_configure() {
     find_memmove();
 #endif
 
-    fprintf(yyout, "#define SIZEOF_INT %i\n", sizeof(int));
-    fprintf(yyout, "#define SIZEOF_PTR %i\n", sizeof(char *));
-    fprintf(yyout, "#define SIZEOF_SHORT %i\n", sizeof(short));
-    fprintf(yyout, "#define SIZEOF_FLOAT %i\n", sizeof(double));
-    fprintf(yyout, "#define SIZEOF_LONG %i\n", sizeof(long));
+    fprintf(yyout, "#define SIZEOF_INT %lu\n", sizeof(int));
+    fprintf(yyout, "#define SIZEOF_PTR %lu\n", sizeof(char *));
+    fprintf(yyout, "#define SIZEOF_SHORT %lu\n", sizeof(short));
+    fprintf(yyout, "#define SIZEOF_FLOAT %lu\n", sizeof(double));
+    fprintf(yyout, "#define SIZEOF_LONG %lu\n", sizeof(long));
 
     if (sizeof(unsigned long) == 4)
         fprintf(yyout, "#define UINT32 unsigned long\n");

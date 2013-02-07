@@ -641,10 +641,10 @@ f_terminal_colour (void)
 	resetstrname = findstring("RESET");
 	k = sp->u.map->table_size;
 	if (resetstrname) {
-		int tmp;
 		static svalue_t str = {T_STRING, STRING_SHARED};
+		int tmp = MAP_SVAL_HASH(str);
 		str.u.string = resetstrname;
-		tmp = MAP_SVAL_HASH(str);
+
 		for (elt = mtab[tmp & k]; elt; elt = elt->next) {
 			if ( elt->values->type == T_STRING &&
 					(elt->values + 1)->type == T_STRING &&
@@ -658,7 +658,7 @@ f_terminal_colour (void)
 
 	if(!resetstrlen) {
 		//we really really need one, so just default to ansi reset
-		resetstr = "\e[49;49m\e[0;10m";
+		resetstr = "\033[49;49m\033[0;10m";
 		resetstrlen = 15;
 		add_mapping_string(sp->u.map, "RESET", resetstr);
 	}
@@ -681,10 +681,9 @@ f_terminal_colour (void)
 		}
 
 		if((repused && (cp = findstring(rep))) || (!repused && (cp = findstring(parts[i])))) {
-			int tmp;
 			static svalue_t str = {T_STRING, STRING_SHARED};
+			int tmp= MAP_SVAL_HASH(str);
 			str.u.string = cp;
-			tmp = MAP_SVAL_HASH(str);
 			for (elt = mtab[tmp & k]; elt; elt = elt->next) {
 				if ( elt->values->type == T_STRING &&
 						(elt->values + 1)->type == T_STRING &&
@@ -2885,7 +2884,6 @@ void f_restore_from_string(){
 void f_classes() {
    int i, j, num, size, offset, flag;
    array_t *vec, *subvec, *subsubvec;
-   unsigned short *types;
    char buf[256];
    char *end;
    program_t *prog;

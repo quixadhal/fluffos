@@ -6,23 +6,8 @@
 #ifndef _MAPPING_H
 #define _MAPPING_H
 
-#define MAP_SVAL_HASH(x) sval_hash(x)
 #include "hash.h"
 #include "stralloc.h"
-//#define MAP_SVAL_HASH(x) (((POINTER_INT)((x).u.number)) >> 5)
-static unsigned long sval_hash(svalue_t x){
-    switch(x.type)
-    {
-        case T_STRING:
-            return HASH(BLOCK(x.u.string));
-        case T_NUMBER:
-            return (unsigned long)x.u.number;
-        case T_OBJECT:
-            //return HASH(BLOCK(x.u.ob->obname));
-        default:
-            return (unsigned long)(((POINTER_INT)((x).u.number)) >> 5);
-    }
-}
 
 typedef struct mapping_node_s {
     struct mapping_node_s *next;
@@ -89,6 +74,9 @@ extern int num_mappings;
 extern int total_mapping_size;
 extern int total_mapping_nodes;
 extern mapping_node_t *locked_map_nodes;
+
+#define MAP_SVAL_HASH(x) sval_hash(x)
+INLINE unsigned long sval_hash(svalue_t x);
 
 int msameval (svalue_t *, svalue_t *);
 int mapping_save_size (mapping_t *);
