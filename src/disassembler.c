@@ -228,7 +228,7 @@ disassemble (FILE * f, char * code, int start, int end, program_t * prog)
 {
     extern int num_simul_efun;
 
-    long i, j, instr, iarg, is_efun, ri;
+    long i, j, instr, iarg, ri;
     unsigned short sarg;
     unsigned short offset;
     char *pc, buff[2048];
@@ -273,8 +273,6 @@ disassemble (FILE * f, char * code, int start, int end, program_t * prog)
         }
 
         fprintf(f, "%04x: ", (unsigned) (pc - code));
-
-        is_efun = (instr = EXTRACT_UCHAR(pc)) >= BASE;
 
         pc++;
         buff[0] = 0;
@@ -524,7 +522,7 @@ disassemble (FILE * f, char * code, int start, int end, program_t * prog)
             case FP_ANONYMOUS:
             case FP_ANONYMOUS | FP_NOT_BINDABLE:
                 COPY_SHORT(&sarg, &pc[2]);
-                sprintf(buff, "<anonymous function, %d args, %d locals, ends at %04x>\nCode:",
+                sprintf(buff, "<anonymous function, %d args, %d locals, ends at %04ld>\nCode:",
                         pc[0], pc[1], (pc + 3 + sarg - code));
                 pc += 4;
                 break;

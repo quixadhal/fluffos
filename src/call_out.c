@@ -133,7 +133,7 @@ new_call_out (object_t * ob, svalue_t * fun, int delay,
     /* number of cycles */
     delay = delay / CALLOUT_CYCLE_SIZE;
 
-    DBG(("Current time: %i  Executes at: %i  Slot: %i  Delay: %i",
+    DBG(("Current time: %ld  Executes at: %ld  Slot: %d  Delay: %d",
      current_time, current_time + delay, tm, delay));
 
     for (copp = &call_list[tm]; *copp; copp = &(*copp)->next) {
@@ -169,7 +169,7 @@ new_call_out (object_t * ob, svalue_t * fun, int delay,
  */
 void call_out()
 {
-    int extra, real_time;
+    long extra, real_time;
     static pending_call_t *cop = 0;
     error_context_t econ;
     VOLATILE int tm;
@@ -183,7 +183,7 @@ void call_out()
     }
 
     real_time = get_current_time();
-    DBG(("Calling call_outs: current_time: %i real_time: %i difference: %i",
+    DBG(("Calling call_outs: current_time: %ld real_time: %ld difference: %ld",
      current_time, real_time, real_time - current_time));
 
     /* Slowly advance the clock forward towards real_time, doing call_outs
@@ -283,7 +283,7 @@ void call_out()
 	if (call_list[tm])
 	  call_list[tm]->delta--;
 	current_time++;
-	DBG(("   current_time = %i", current_time));
+	DBG(("   current_time = %ld", current_time));
 	if(!(current_time%HEARTBEAT_INTERVAL))
 	  call_heart_beat();
       } else {
@@ -459,7 +459,7 @@ void mark_call_outs()
  */
 array_t *get_all_call_outs()
 {
-    int i, j, delay, tm;
+    int i, j, delay;
     pending_call_t *cop;
     array_t *v;
 
@@ -471,7 +471,6 @@ array_t *get_all_call_outs()
   }
 
     v = allocate_empty_array(i);
-    tm = current_time & (CALLOUT_CYCLE_SIZE-1);
 
     for (i = 0, j = 0; j < CALLOUT_CYCLE_SIZE; j++) {
   delay = 0;

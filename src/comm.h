@@ -116,13 +116,13 @@ typedef struct interactive_s {
     int message_producer;       /* message buffer producer index */
     int message_consumer;       /* message buffer consumer index */
     int message_length;         /* message buffer length */
-    char message_buf[MESSAGE_BUF_SIZE]; /* message buffer */
+    unsigned char message_buf[MESSAGE_BUF_SIZE]; /* message buffer */
     int iflags;                 /* interactive flags */
     char out_of_band;           /* Send a telnet sync operation            */
     int state;                  /* Current telnet state.  Bingly wop       */
     int sb_pos;                 /* Telnet suboption negotiation stuff      */
     struct translation *trans;
-    char *sb_buf;
+    unsigned char *sb_buf;
     int sb_size;
     char slc[NSLC][2];
 } interactive_t;

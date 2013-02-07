@@ -293,7 +293,7 @@ fi
 #
 # Figure out what to use for install
 #
-mkdir tmp
+mkdir tmp >> /de/null
 cat >insttest <<END
 whatever
 END
@@ -376,6 +376,7 @@ int main() {
 }
 END
 $CC $CFLAGS comptest.c
+echo $CC $CCFLAGS
 ARCH=`./$A_OUT`
 
 cat >comptest.c <<END
