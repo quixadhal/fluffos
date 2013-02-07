@@ -3,17 +3,13 @@
  * by David Bennett (ddt@discworld.imaginary.com)
  */
 
-#ifdef LATTICE
-#include "/lpc_incl.h"
-#include "/file_incl.h"
-#include "/file.h"
-#else
+#pragma GCC diagnostic ignored "-Wmissing-declarations"
+
+#include <zlib.h>
+
 #include "../lpc_incl.h"
 #include "../file_incl.h"
 #include "../file.h"
-#endif
-
-#include <zlib.h>
 
 #define GZ_EXTENSION ".gz"
 

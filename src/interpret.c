@@ -1915,7 +1915,7 @@ eval_instruction (char * p)
       char *f;
       int l;
       /* this could be much more efficient ... */
-      get_line_number_info(&f, &l);
+      get_line_number_info((const char**)&f, &l);
       show_lpc_line(f, l);
     }
 #  endif

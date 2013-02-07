@@ -4,7 +4,7 @@ if test $# -ne 0; then
     case $1 in
         develop)
 	    echo Preparing to build developmental version of MudOS driver ...
-	    OPTIMIZE="-Wall -Wextra -Wundef -DPEDANTIC -pedantic -Wmissing-declarations"
+	    OPTIMIZE="-Wall -Wundef -DPEDANTIC -pedantic"
 	    DEBUG="-g -DDEBUG -DDEBUG_MACRO"
             ;;
         debug)
