@@ -18,7 +18,6 @@ func_spec.cpp
 grammar.tab.c
 grammar.tab.h
 grammar.y
-local_options
 make_func.tab.c
 malloc.c
 mallocwrapper.c
