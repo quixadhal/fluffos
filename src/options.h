@@ -235,7 +235,7 @@
 
 /* OLD_RANGE_BEHAVIOR: define this if you want negative indexes in string
  * or buffer range values (not lvalue, i.e. x[-2..-1]; for e.g. not
- * x[-2..-1] = foo, the latter is always illegal) to mean counting from the
+ * x[-1] = foo, the latter is always illegal) to mean counting from the
  * end
  *
  * Compat status: Not horribly difficult to replace reliance on this, but not
@@ -557,7 +557,7 @@
 #undef ARRAY_RESERVED_WORD
 
 /* REF_RESERVED_WORD: If this is defined then the word 'ref' can be
- *   used to pass arguments to functions by value.  Example:
+ *   used to pass arguments to functions by reference.  Example:
  *
  * void inc(int ref x) {
  *     x++;
@@ -833,12 +833,12 @@
 
 
 /* GET_CHAR_IS_BUFFERED: Normally get_char() is unbuffered.  That is, once
- * a character is received for get_char(), anything else is in the input
- * stream is immediately thrown away.  This can be very undesirable, especially
- * if you're calling get_char() again from the handler from the previous call.
- * Define this if you want get_char() to be buffered.  In this case, the buffer
- * will only get flushed if get_char() is not called from the first get_char()'s
- * LPC callback handler.
+ * a character is received for get_char(), anything else in the input stream
+ * is immediately thrown away.  This can be very undesirable, especially if
+ * you're calling get_char() again from the handler from the previous call.
+ * Define this if you want get_char() to be buffered.  In this case, the
+ * buffer will only get flushed if get_char() is not called from the first
+ * get_char()'s LPC callback handler.
  */
 #undef GET_CHAR_IS_BUFFERED
 
@@ -898,7 +898,7 @@
  */
 #define HAS_CONSOLE
 
-/* IPV6: Use IP version 6 instead of 4, for most people the only difference 
+/* IPV6: Use IP version 6 instead of 4, for most people the only difference
  * will be that numerical IP addresses get ::ffff: added in front.*/
 #define IPV6
 
