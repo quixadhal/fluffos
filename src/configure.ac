@@ -26,25 +26,24 @@ F_SUPPORT_CXX11([], [AC_MSG_ERROR([
 AX_APPEND_COMPILE_FLAGS([-D_GNU_SOURCE])
 AX_APPEND_COMPILE_FLAGS([-fno-omit-frame-pointer])
 AX_APPEND_COMPILE_FLAGS([-iquote.])
+# This flag must be check for LINK.
+AX_CHECK_LINK_FLAG([-flto], [AX_APPEND_COMPILE_FLAGS([-flto])])
 
-AX_CHECK_LINK_FLAG([-flto], [
-  AX_APPEND_COMPILE_FLAGS([-flto])
-  AX_APPEND_LINK_FLAGS([-flto])
-])
-
-AX_CHECK_LINK_FLAG([-pie], [
-  AX_APPEND_COMPILE_FLAGS([-fPIE])
-  AX_APPEND_LINK_FLAGS([-pie])
-])
-
-case $host_os in
-*cygwin*|*mingw*)
-  # rdynamic doesn't work on cygwin
-  ;;
-*)
-  AX_APPEND_LINK_FLAGS([-rdynamic])
-  ;;
+# CYGWIN oddities
+# JEMALLOC doesn't work on CYGWIN
+case "${host}" in
+    *-*-cygwin*)
+        USE_JEMALLOC=0
+        ;;
+    *)
+        USE_JEMALLOC=1
+        AX_APPEND_LINK_FLAGS([-rdynamic])
+        AX_APPEND_COMPILE_FLAGS([-fPIE])
+        AX_APPEND_COMPILE_FLAGS([-pie])
+        ;;
 esac
+
+AX_APPEND_COMPILE_FLAGS([-pthread])
 
 # check for gcov options
 FLUFFOS_CHECK_GCOV
@@ -99,11 +98,13 @@ AC_FUNC_REALLOC
 AC_FUNC_STRTOD
 #AC_CHECK_FUNCS([dup2 floor getcwd gethostname gettimeofday memchr memmove memset mkdir munmap pow putenv regcomp rmdir setlocale socket sqrt strcasecmp strchr strcspn strerror strncasecmp strpbrk strrchr strspn strstr strtol strtoul tzset])
 
+
+
 # This check must before all F_HAVE_PREDEFINE checks.
 # Checks local_options exist, use a grauntee exist predefine.
 F_HAVE_PREDEFINE([__cplusplus], [], [AC_MSG_ERROR([[You must have local_options file, see options.h.]])])
 
-grep -o -f ./outdated_define.txt local_options
+grep -o -w -f ./outdated_define.txt local_options
 if [[ $? == 0 ]]; then
   AC_MSG_ERROR([[ Your local_options contains outdated defines that has been moved to runtime config. see outdated_define.txt ]])
 fi
@@ -170,6 +171,7 @@ AC_SUBST([ARCH])
 AC_SUBST([DRIVER_BIN])
 AC_SUBST([OPTIMIZE])
 AC_SUBST([SOURCE_REVISION])
+AC_SUBST([USE_JEMALLOC])
 
 AC_CONFIG_HEADERS([configure.h])
 AC_CONFIG_FILES([Makefile])

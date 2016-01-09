@@ -33,6 +33,7 @@
 #include "packages/core/outbuf.h"
 #include "packages/core/reclaim.h"
 #include "packages/core/custom_crypt.h"
+#include "packages/core/ed.h"
 
 int data_size(object_t *ob);
 void reload_object(object_t *obj);
@@ -741,21 +742,6 @@ void f_function_exists(void) {
   } else {
     *sp = const0;
   }
-}
-#endif
-
-#ifdef F_GENERATE_SOURCE
-void f_generate_source(void) {
-  int i;
-
-  if (st_num_arg == 2) {
-    i = generate_source(sp - 1, sp->u.string);
-    pop_stack();
-  } else {
-    i = generate_source(sp, 0);
-  }
-  free_svalue(sp, "f_generate_source");
-  put_number(i);
 }
 #endif
 
@@ -2402,6 +2388,21 @@ void f_set_hide(void) {
     num_hidden--;
     current_object->flags &= ~O_HIDDEN;
   }
+}
+#endif
+
+#ifdef F_SET_LIGHT
+void f_set_light(void) {
+  object_t *o1;
+
+  add_light(current_object, sp->u.number);
+  o1 = current_object;
+#ifndef NO_ENVIRONMENT
+  while (o1->super) {
+    o1 = o1->super;
+  }
+#endif
+  sp->u.number = o1->total_light;
 }
 #endif
 

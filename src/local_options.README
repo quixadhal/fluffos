@@ -24,9 +24,10 @@
 /****************************************************************************
  *                          COMPATIBILITY                                   *
  *                         ---------------                                  *
- * The MudOS driver has evolved quite a bit over the years.  These defines  *
- * are mainly to preserve old behavior in case people didn't want to        *
- * rewrite the relevant portions of their code.                             *
+ * The MudOS driver and following this the extensions making up the FluffOS *
+ * driver has evolved quite a bit over the years.  These defines are mainly *
+ * to preserve old behavior in case people didn't want to rewrite the       *
+ * relevant portions of their code.                                         *
  *                                                                          *
  * In most cases, code which needs these defines should be rewritten when   *
  * possible.  The 'Compat status' field is designed to give an idea how     *
@@ -75,6 +76,13 @@
  */
 #undef NO_WIZARDS
 
+ /* NO_LIGHT: define this to disable the set_light() and driver maintenance
+ *   of light levels in objects.  You can simulate it via LPC if you want...
+ *
+ * Compat status: Very dated, easy to simulate, and gross.
+ */
+#undef NO_LIGHT
+
 /* OLD_ED: ed() efun backwards compatible with the old version.  The new
  * version requires/allows a mudlib front end.
  *
@@ -88,6 +96,22 @@
  */
 #undef ED_INDENT_CASE
 #define ED_INDENT_SPACES 4
+
+/* RECEIVE_ED: define this if you want normal ed output to go to a
+     receive_ed() apply in the player ob.  Some errors still go directly
+     to output.  Useful for post-processing (perhaps colorizing?) ed
+     output. Prototype:  mixed receive_ed(string txt, string fname);
+     If fname, return a string that ed will output, 0 to let ed handle
+     the output in the default way, or 1 to handle the output yourself.
+     If fname == 0, output is help text and you may return any of the above
+     or an array of strings that will be more'ed.
+     This works wirh OLD_ED enabled only!!!
+*/
+#undef RECEIVE_ED
+
+/* RESTRICTED_ED: define this if you want restricted ed mode enabled.
+ */
+#define RESTRICTED_ED
 
 /* SENSIBLE_MODIFIERS:
  * Turning this on changes a few things, which may break old code:
@@ -167,6 +191,8 @@
  *   and restore_object().  Some sysadmins run scripts that periodically
  *   scan for and remove files ending in .o (but many mudlibs are already
  *   set up to use .o thus we leave .o as the default).
+ *   If you are changing this and using the builtin compression via
+ *   PACKAGE_COMPRESS you might want to change SAVE_GZ_EXTENSION below too.
  */
 #define SAVE_EXTENSION ".o"
 
@@ -181,21 +207,6 @@
  *  the inherits() efun and the 'valid_object' apply to master.]
  */
 #undef PRIVS
-
-/* RECEIVE_ED: define this if you want normal ed output to go to a
-     receive_ed() apply in the player ob.  Some errors still go directly
-     to output.  Useful for post-processing (perhaps colorizing?) ed
-     output. Prototype:  mixed receive_ed(string txt, string fname);
-     If fname, return a string that ed will output, 0 to let ed handle
-     the output in the default way, or 1 to handle the output yourself.
-     If fname == 0, output is help text and you may return any of the above
-     or an array of strings that will be more'ed.
-*/
-#undef RECEIVE_ED
-
-/* RESTRICTED_ED: define this if you want restricted ed mode enabled.
- */
-#define RESTRICTED_ED
 
 /* NO_SHADOWS: define this if you want to disable shadows in your driver.
  */
@@ -223,6 +234,7 @@
  * and the efuns in packages/xyzzy_spec.c will be added to the driver.      *
  ****************************************************************************/
 
+/* base packages, you won't undef these two */
 #define PACKAGE_OPS
 #define PACKAGE_CORE
 
@@ -267,13 +279,21 @@
 /* PACKAGE_DB: efuns for external database access using msql */
 #undef PACKAGE_DB
 
-/* If PACKAGE_DB is defined above, you must pick ONE of the following supported
+/* If PACKAGE_DB is defined above, you must pick at least one of the following supported
  * databases
+ *
+ * ATTENTION:
+ * no two choices must use the same number and if more then one type is
+ * choosen the mudlib should provide a corresponding headerfile for use with
+ * efun::db_connect()
  */
 #ifdef PACKAGE_DB
 #define USE_MYSQL 1
+#undef USE_MSQL
 #undef USE_POSTGRES
 #undef USE_SQLITE3
+
+#define DEFAULT_DB  USE_MYSQL
 #endif
 
 /*PACKAGE_ASYNC: adds some efuns for asyncronous IO */
@@ -311,9 +331,14 @@
  */
 #define PACKAGE_TRIM
 
+/*
+   PACKAGE PCRE:
+    efuns for perl compatible regular expressionsi
+ */
+#define PACKAGE_PCRE
+
 /*PACKAGE DWLIB: some discworld mudlib simuls coded in C (well just one right
   now) */
-
 #undef PACKAGE_DWLIB
 
 /****************************************************************************
@@ -354,5 +379,7 @@
  */
 #define PACKAGE_COMPRESS
 #define SAVE_GZ_EXTENSION ".o.gz"
+
+#undef PACKAGE_THREAD
 
 #endif /* _LOCAL_OPTIONS_H_ */

@@ -620,6 +620,7 @@ ac_includes_default="\
 
 ac_header_list=
 ac_subst_vars='LTLIBOBJS
+USE_JEMALLOC
 SOURCE_REVISION
 OPTIMIZE
 DRIVER_BIN
@@ -4029,7 +4030,7 @@ fi
 
 done
 
-
+# This flag must be check for LINK.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -flto" >&5
 $as_echo_n "checking whether the linker accepts -flto... " >&6; }
 if ${ax_cv_check_ldflags___flto+:} false; then :
@@ -4061,7 +4062,6 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___flto" >&5
 $as_echo "$ax_cv_check_ldflags___flto" >&6; }
 if test x"$ax_cv_check_ldflags___flto" = xyes; then :
-
 
 
 
@@ -4127,11 +4127,24 @@ fi
 
 done
 
+else
+  :
+fi
+
+
+# CYGWIN oddities
+# JEMALLOC doesn't work on CYGWIN
+case "${host}" in
+    *-*-cygwin*)
+        USE_JEMALLOC=0
+        ;;
+    *)
+        USE_JEMALLOC=1
 
 
 
 
-for flag in -flto; do
+for flag in -rdynamic; do
   as_CACHEVAR=`$as_echo "ax_cv_check_ldflags__$flag" | $as_tr_sh`
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts $flag" >&5
 $as_echo_n "checking whether the linker accepts $flag... " >&6; }
@@ -4192,44 +4205,6 @@ else
 fi
 
 done
-
-
-else
-  :
-fi
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts -pie" >&5
-$as_echo_n "checking whether the linker accepts -pie... " >&6; }
-if ${ax_cv_check_ldflags___pie+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-  ax_check_save_flags=$LDFLAGS
-  LDFLAGS="$LDFLAGS  -pie"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ax_cv_check_ldflags___pie=yes
-else
-  ax_cv_check_ldflags___pie=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-  LDFLAGS=$ax_check_save_flags
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_ldflags___pie" >&5
-$as_echo "$ax_cv_check_ldflags___pie" >&6; }
-if test x"$ax_cv_check_ldflags___pie" = xyes; then :
 
 
 
@@ -4301,15 +4276,15 @@ done
 
 
 for flag in -pie; do
-  as_CACHEVAR=`$as_echo "ax_cv_check_ldflags__$flag" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts $flag" >&5
-$as_echo_n "checking whether the linker accepts $flag... " >&6; }
+  as_CACHEVAR=`$as_echo "ax_cv_check_cxxflags__$flag" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C++ compiler accepts $flag" >&5
+$as_echo_n "checking whether C++ compiler accepts $flag... " >&6; }
 if eval \${$as_CACHEVAR+:} false; then :
   $as_echo_n "(cached) " >&6
 else
 
-  ax_check_save_flags=$LDFLAGS
-  LDFLAGS="$LDFLAGS  $flag"
+  ax_check_save_flags=$CXXFLAGS
+  CXXFLAGS="$CXXFLAGS  $flag"
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -4321,39 +4296,38 @@ main ()
   return 0;
 }
 _ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
+if ac_fn_cxx_try_compile "$LINENO"; then :
   eval "$as_CACHEVAR=yes"
 else
   eval "$as_CACHEVAR=no"
 fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-  LDFLAGS=$ax_check_save_flags
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CXXFLAGS=$ax_check_save_flags
 fi
 eval ac_res=\$$as_CACHEVAR
 	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
 $as_echo "$ac_res" >&6; }
 if test x"`eval 'as_val=${'$as_CACHEVAR'};$as_echo "$as_val"'`" = xyes; then :
-  if ${LDFLAGS+:} false; then :
-  case " $LDFLAGS " in
+  if ${CXXFLAGS+:} false; then :
+  case " $CXXFLAGS " in
     *" $flag "*)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains \$flag"; } >&5
-  (: LDFLAGS already contains $flag) 2>&5
+      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS already contains \$flag"; } >&5
+  (: CXXFLAGS already contains $flag) 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
       ;;
     *)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS \$flag\""; } >&5
-  (: LDFLAGS="$LDFLAGS $flag") 2>&5
+      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS \$flag\""; } >&5
+  (: CXXFLAGS="$CXXFLAGS $flag") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }
-      LDFLAGS="$LDFLAGS $flag"
+      CXXFLAGS="$CXXFLAGS $flag"
       ;;
    esac
 else
-  LDFLAGS="$flag"
+  CXXFLAGS="$flag"
 fi
 
 else
@@ -4362,85 +4336,74 @@ fi
 
 done
 
-
-else
-  :
-fi
-
-
-case $host_os in
-*cygwin*|*mingw*)
-  # rdynamic doesn't work on cygwin
-  ;;
-*)
-
-
-
-
-for flag in -rdynamic; do
-  as_CACHEVAR=`$as_echo "ax_cv_check_ldflags__$flag" | $as_tr_sh`
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the linker accepts $flag" >&5
-$as_echo_n "checking whether the linker accepts $flag... " >&6; }
-if eval \${$as_CACHEVAR+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-  ax_check_save_flags=$LDFLAGS
-  LDFLAGS="$LDFLAGS  $flag"
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  eval "$as_CACHEVAR=yes"
-else
-  eval "$as_CACHEVAR=no"
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-  LDFLAGS=$ax_check_save_flags
-fi
-eval ac_res=\$$as_CACHEVAR
-	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
-$as_echo "$ac_res" >&6; }
-if test x"`eval 'as_val=${'$as_CACHEVAR'};$as_echo "$as_val"'`" = xyes; then :
-  if ${LDFLAGS+:} false; then :
-  case " $LDFLAGS " in
-    *" $flag "*)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS already contains \$flag"; } >&5
-  (: LDFLAGS already contains $flag) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      ;;
-    *)
-      { { $as_echo "$as_me:${as_lineno-$LINENO}: : LDFLAGS=\"\$LDFLAGS \$flag\""; } >&5
-  (: LDFLAGS="$LDFLAGS $flag") 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }
-      LDFLAGS="$LDFLAGS $flag"
-      ;;
-   esac
-else
-  LDFLAGS="$flag"
-fi
-
-else
-  :
-fi
-
-done
-
-  ;;
+        ;;
 esac
+
+
+
+
+
+for flag in -pthread; do
+  as_CACHEVAR=`$as_echo "ax_cv_check_cxxflags__$flag" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether C++ compiler accepts $flag" >&5
+$as_echo_n "checking whether C++ compiler accepts $flag... " >&6; }
+if eval \${$as_CACHEVAR+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+  ax_check_save_flags=$CXXFLAGS
+  CXXFLAGS="$CXXFLAGS  $flag"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"; then :
+  eval "$as_CACHEVAR=yes"
+else
+  eval "$as_CACHEVAR=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  CXXFLAGS=$ax_check_save_flags
+fi
+eval ac_res=\$$as_CACHEVAR
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if test x"`eval 'as_val=${'$as_CACHEVAR'};$as_echo "$as_val"'`" = xyes; then :
+  if ${CXXFLAGS+:} false; then :
+  case " $CXXFLAGS " in
+    *" $flag "*)
+      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS already contains \$flag"; } >&5
+  (: CXXFLAGS already contains $flag) 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+      ;;
+    *)
+      { { $as_echo "$as_me:${as_lineno-$LINENO}: : CXXFLAGS=\"\$CXXFLAGS \$flag\""; } >&5
+  (: CXXFLAGS="$CXXFLAGS $flag") 2>&5
+  ac_status=$?
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; }
+      CXXFLAGS="$CXXFLAGS $flag"
+      ;;
+   esac
+else
+  CXXFLAGS="$flag"
+fi
+
+else
+  :
+fi
+
+done
+
 
 # check for gcov options
 
@@ -6797,6 +6760,8 @@ fi
 
 #AC_CHECK_FUNCS([dup2 floor getcwd gethostname gettimeofday memchr memmove memset mkdir munmap pow putenv regcomp rmdir setlocale socket sqrt strcasecmp strchr strcspn strerror strncasecmp strpbrk strrchr strspn strstr strtol strtoul tzset])
 
+
+
 # This check must before all F_HAVE_PREDEFINE checks.
 # Checks local_options exist, use a grauntee exist predefine.
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -6817,7 +6782,7 @@ fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
 
-grep -o -f ./outdated_define.txt local_options
+grep -o -w -f ./outdated_define.txt local_options
 if [ $? == 0 ]; then
   as_fn_error $? " Your local_options contains outdated defines that has been moved to runtime config. see outdated_define.txt " "$LINENO" 5
 fi
@@ -9220,6 +9185,7 @@ fi
 
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
 
 
 
