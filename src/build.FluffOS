@@ -335,7 +335,7 @@ gcc-ranlib comptest.a
 if test $? -eq 0; then
     RANLIB=gcc-ranlib
 else
-    echo "FATAL ERROR: Could not find gcc-ar."
+    echo "FATAL ERROR: Could not find gcc-ranlib."
     exit
 fi
 
