@@ -328,15 +328,25 @@ gcc-ar rcu comptest.a comptest.o
 if test $? -eq 0; then
     AR=gcc-ar
 else
-    echo "FATAL ERROR: Could not find gcc-ar."
-    exit
+    ar rcu comptest.a comptest.o
+    if test $? -eq 0; then
+        AR=ar
+    else
+        echo "FATAL ERROR: Could not find gcc-ar."
+        exit
+    fi
 fi
 gcc-ranlib comptest.a
 if test $? -eq 0; then
     RANLIB=gcc-ranlib
 else
-    echo "FATAL ERROR: Could not find gcc-ranlib."
-    exit
+    gcc-ranlib comptest.a
+    if test $? -eq 0; then
+        RANLIB=ranlib
+    else
+        echo "FATAL ERROR: Could not find gcc-ranlib."
+        exit
+    fi
 fi
 
 #
