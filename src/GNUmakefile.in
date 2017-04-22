@@ -91,7 +91,7 @@ grammar.tab.c: grammar.y
 	-mv y.tab.h grammar.tab.h
 
 packages/packages.a: packages/*.c
-	$(MAKE) -C packages 'CC=$(CC)' 'CFLAGS=$(CFLAGS) $(OPTIMIZE)' 'OBJDIR=../$(OBJDIR)' 'RANLIB=$(RANLIB)' 'A=$(A)' 'O=$(O)'
+	$(MAKE) -C packages 'CC=$(CC)' 'CFLAGS=$(CFLAGS) $(OPTIMIZE)' 'OBJDIR=../$(OBJDIR)' 'RANLIB=$(RANLIB)' 'AR=$(AR)' 'A=$(A)' 'O=$(O)'
 
 $(DRIVER_BIN): packages/packages.a $(OBJ) dtrace_compile
 	-mv -f $(DRIVER_BIN) $(DRIVER_BIN).old

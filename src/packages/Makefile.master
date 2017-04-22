@@ -11,7 +11,7 @@ $(OBJDIR)/%.o: %.c
 %endif
 
 all: $(OBJ)
-	ar rcu packages.$(A) $(OBJ)
+	$(AR) rcu packages.$(A) $(OBJ)
 	$(RANLIB) packages.$(A)
 
 %ifdef GNU

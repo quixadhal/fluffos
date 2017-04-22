@@ -324,16 +324,19 @@ int if_you_are_reading_this_you_must_be_bored() { return 1; }
 END
 $CC -c comptest.c
 
-ar rcu comptest.a comptest.o
-if test $? -ne 0; then
-    echo "FATAL ERROR: Could not find ar."
+gcc-ar rcu comptest.a comptest.o
+if test $? -eq 0; then
+    AR=gcc-ar
+else
+    echo "FATAL ERROR: Could not find gcc-ar."
     exit
 fi
-ranlib comptest.a
+gcc-ranlib comptest.a
 if test $? -eq 0; then
-    RANLIB=ranlib    
+    RANLIB=gcc-ranlib
 else
-    RANLIB=/bin/true
+    echo "FATAL ERROR: Could not find gcc-ar."
+    exit
 fi
 
 #
@@ -429,6 +432,7 @@ echo CFLAGS=$CFLAGS >>Makefile.tmp
 echo CC=$CC >>Makefile.tmp
 echo YACC=$YACC >>Makefile.tmp
 echo RANLIB=$RANLIB >>Makefile.tmp
+echo AR=$AR >>Makefile.tmp
 echo A=a >>Makefile.tmp
 echo O=o >>Makefile.tmp
 echo A_OUT=$A_OUT >>Makefile.tmp
