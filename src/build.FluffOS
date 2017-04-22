@@ -340,7 +340,7 @@ gcc-ranlib comptest.a
 if test $? -eq 0; then
     RANLIB=gcc-ranlib
 else
-    gcc-ranlib comptest.a
+    ranlib comptest.a
     if test $? -eq 0; then
         RANLIB=ranlib
     else
