@@ -227,7 +227,7 @@ nothing:
 
 # remove local configuration
 spotless: clean
-	-rm -f configure.h local_options system_libs configuration
+	-rm -f local_options configuration
 	-rm -f options_incl.h
 	-rm -f *.diffs
 	-find . -name "*~" -print | xargs rm
