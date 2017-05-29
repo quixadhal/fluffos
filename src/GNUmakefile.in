@@ -228,6 +228,7 @@ clean: neat
 	-rm -f $(DRIVER_BIN) $(DRIVER_BIN).old addr_server portbind *.exe
 	-rm -f Dependencies tmpdepend
 	-touch Dependencies
+	-rm -f configure.h system_libs
 
 # remove everything
 distclean: neat

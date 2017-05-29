@@ -242,4 +242,5 @@ clean: neat
 	-find . -name "*.rej" -print | xargs rm
 	-rm -f *.ln tags TAGS
 	-rm -f $(DRIVER_BIN) $(DRIVER_BIN).old addr_server portbind
+	-rm -f configure.h system_libs
 # DO NOT DELETE THIS LINE -- make depend depends on it.

@@ -263,4 +263,5 @@ clean: neat
 	-rm testsuite\tmp_eval_file.c testsuite\sf.o testsuite\ed_test
 	-rm testsuite\log\log testsuite\log\debug.log testsuite\log\compile
 	-rm -f $(DRIVER_BIN).exe $(DRIVER_BIN).old addr_server.exe
+	-rm -f configure.h system_libs
 # DO NOT DELETE THIS LINE -- make depend depends on it.
