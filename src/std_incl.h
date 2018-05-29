@@ -8,6 +8,7 @@
 #  include <unistd.h>
 #endif
 
+#include <stdint.h>
 #include <sys/types.h>
 #include <stdio.h>
 #include <setjmp.h>

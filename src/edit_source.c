@@ -13,6 +13,7 @@
 #include "hash.h"
 #include <stdlib.h>
 #include <unistd.h>
+#include <stdint.h>
 
 #ifdef WIN32
 #include <process.h>
