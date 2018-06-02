@@ -57,15 +57,37 @@
  *   * Wodan's malloc, uses system malloc for small allocations and spreads
  *   * large allocations through the 64 bit memory space
  *   * won't work on 32 bit systems.
+ *
  * MALLOC32
  *   * fixes realloc by always doing a malloc/memcpy/free instead, try this
  *   * if you use more memory than expected (or MALLOC64 on a 64bit system).
+ *
+ * SMALLOC:
+ *   * Satoria's smalloc.
+ *   * Statistics available. (see wrappers and DO_MSTATS)
+ *   * Faster than most system mallocs with modest ammount of memory overhead.
+ *   * Can fall back onto system malloc if sbrk() not ok.
+ *
+ * BSDMALLOC:
+ *   * BSD (Berkeley Software Distributions) malloc.
+ *   * Statistics available. (see wrappers and DO_MSTATS)
+ *   * Faster than SMALLOC but more memory overhead.
+ *   * Requires sbrk().
+ *
+ * GCMALLOC:
+ *   * Garbage Collecting malloc.
+ *   * This malloc automatically frees memory when no longer referenced.
+ *   * Performance can be less predictable, as garbage collection happens
+ *     automatically, and is not directly controllable for the user.
  */
 #define SYSMALLOC
-#undef MMALLOC
 #undef MALLOC64
 #undef MALLOC32
+#undef MMALLOC
+#undef SMALLOC
+#undef BSDMALLOC
 #undef GCMALLOC /* needs -lgc in system_libs */
+
 /* You may optionally choose one (or none) of these malloc wrappers.  These
  * can be used in conjunction with any of the above malloc packages.
  *
@@ -202,9 +224,6 @@
  */
 #undef NO_SNOOP
 
-/* NO_ADD_ACTION: define this to remove add_action, commands, livings, etc.
-   process_input() then becomes the only way to deal with player input. */
-
 /* NO_ENVIRONMENT: define this to remove the handling of object containment
  * relationships by the driver
  *
@@ -246,7 +265,6 @@
 /* define to get a warning for code that might use the old range behavior
  * when you're not actually using the old range behavior*/
 #undef WARN_OLD_RANGE_BEHAVIOR
-
 
 /* OLD_ED: ed() efun backwards compatible with the old version.  The new
  * version requires/allows a mudlib front end.
@@ -310,14 +328,13 @@
  * Keep statistics about allocated strings, etc.  Which can be viewed with
  * the mud_status() efun.  If this is off, mud_status() and memory_info()
  * ignore allocated strings, but string operations run faster.
+ *
+ * Similarly for arrays and classes ...
  */
 #define STRING_STATS
-
-/*
- * Similarly for arrays ...
- */
 #define ARRAY_STATS
 #define CLASS_STATS
+
 /* LOG_CATCHES: define this to cause errors that are catch()'d to be
  *   sent to the debug log anyway.
  *
@@ -368,7 +385,7 @@
  *   config files by default.  If you don't wish to use this define, you may
  *   always specify a full path to the config file when starting the driver.
  */
-#define CONFIG_FILE_DIR "/home/atuin/bin"
+#define CONFIG_FILE_DIR "."
 
 /* DEFAULT_PRAGMAS:  This should be a sum of pragmas you want to always
  * be on, i.e.
@@ -391,8 +408,12 @@
  * PRAGMA_SAVE_TYPES:   save the types of function arguments for checking
  *                      calls to functions in this object by objects that
  *                      inherit it.
+ * PRAGMA_SAVE_BINARY:  save a compiled binary version of this file for
+ *                      faster loading next time it is needed.
+ *                      (This is almost certainly broken.)
  * PRAGMA_OPTIMIZE:     make a second pass over the generated code to
- *                      optimize it further.  Currently maybe broken.
+ *                      optimize it further.  Used to do jump threading.
+ *                      (This is probably broken.)
  * PRAGMA_ERROR_CONTEXT:include some text telling where on the line a
  *                      compilation error occured.
  */
@@ -403,6 +424,25 @@
  * more quietly.
  */
 #define SUPPRESS_ARGUMENT_WARNINGS
+
+/* BINARIES: define this to enable the 'save_binary' pragma.
+ *   This pragma, when set in a program, will cause it to save a
+ *   binary image when loaded, so that subsequent loadings will
+ *   be much faster.  The binaries are saved in the directory
+ *   specified in the configuration file.  The binaries will not
+ *   load if the LPC source or any of the inherited or included
+ *   files are out of date, in which case the file is compiled
+ *   normally (and may save a new binary).
+ *
+ *   In order to save the binary, valid_save_binary() is called
+ *   in master.c, and is passed the name of the source file.  If
+ *   this returns a non-zero value, the binary is allowed to be
+ *   saved.  Allowing any file by any wizard to be saved as a
+ *   binary is convenient, but may take up a lot of disk space.
+ *
+ *   (This is almost certainly broken.)
+ */
+#undef BINARIES
 
 /* NO_RESETS: completely disable the periodic calling of reset() */
 #undef NO_RESETS
@@ -442,6 +482,11 @@
  */
 #define NO_ANSI
 #define STRIP_BEFORE_PROCESS_INPUT
+
+/* ANSI_SUBSTITUTE:  This replaces the ESC character (ASCII 27) with the
+ * "record separator" non-printable character (ASCII 30).
+ */
+#define ANSI_SUBSTITUTE 0x1e
 
 /* OPCPROF: define this if you wish to enable OPC profiling. Allows a dump
  *   of the # of times each efun is invoked (via the opcprof() efun).
@@ -615,7 +660,10 @@
 /* PACKAGE_PARSER: Natural language parsing efuns for interactive fiction
  *   type applications
  */
-#undef PACKAGE_PARSER
+#define PACKAGE_PARSER
+
+/* Allows for some extended parser debugging? */
+#define PARSE_DEBUG
 
 /* PACKAGE_EXTERNAL: Allows the driver to exec() commands specified in the
  * config file.
@@ -639,6 +687,15 @@
 #undef USE_POSTGRES
 #endif
 
+/*PACKAGE DWLIB: some discworld mudlib simuls coded in C (well just one right now) */
+#define PACKAGE_DWLIB
+
+/* Some specific code for the Dead Souls mudlib */
+#undef PACKAGE_DSLIB
+
+/* Allow the use of perl compatible regular expressions */
+#define PACKAGE_PCRE
+
 /****************************************************************************
  *                            UID PACKAGE                                   *
  *                            -----------                                   *
@@ -657,11 +714,6 @@
  *
  */
 #define PACKAGE_UIDS
-
-/*PACKAGE DWLIB: some discworld mudlib simuls coded in C (well just one right
-  now) */
-
-#define PACKAGE_DWLIB
 
 /* AUTO_SETEUID: when an object is created it's euid is automatically set to
  *   the equivalent of seteuid(getuid(this_object())).  undef AUTO_SETEUID
@@ -694,7 +746,25 @@
  */
 #undef USE_32BIT_ADDRESSES
 
+/* LPC_TO_C: define this to enable LPC->C compilation.
+ *
+ * [NOTE: BINARIES must also be defined for LPC->C to work.  Actually
+ *  using binaries is not required, though.]
+ *
+ * This is almost certainly broken.
+ */
+#undef LPC_TO_C
+
 /* HEARTBEAT_INTERVAL: define heartbeat interval in seconds.
+ *   It used to do this in microseconds (us).
+ *   1,000,000 us = 1 second.  The value of this macro specifies
+ *   the frequency with which the heart_beat method will be called in
+ *   those LPC objects which have called set_heart_beat(1).
+ *
+ * [NOTE: if ualarm() isn't available, alarm() is used instead.  Since
+ *  alarm() requires its argument in units of a second, we map 1 - 1,000,000 us
+ *  to an actual interval of one (1) second and 1,000,001 - 2,000,000 maps to
+ *  an actual interval of two (2) seconds, etc.]
  */
 #define HEARTBEAT_INTERVAL 1
 
@@ -795,8 +865,10 @@
 /* CFG_MAX_GLOBAL_VARIABLES: This value determines the maximum number of
  *   global variables per object.  The maximum value is 65536.  There is
  *   a marginal memory increase for a value over 256.
+ *
+ * Increasing max global vars beyond 256 is not recommended.
  */
-#define CFG_MAX_GLOBAL_VARIABLES        65536
+#define CFG_MAX_GLOBAL_VARIABLES        256
 
 #define CFG_EVALUATOR_STACK_SIZE        3000
 #define CFG_COMPILER_STACK_SIZE         600
@@ -873,6 +945,7 @@
 
 /* ALLOW_INHERIT_AFTER_FUNCTION: allow inheriting after functions have been defined (this includes prototypes). This caused crashes in v22.2a but it may have been fixed since */
 #undef ALLOW_INHERIT_AFTER_FUNCTION
+#undef ALLOW_INHERIT_AFTER_GLOBAL_VARIABLES
 
 /*PACKAGE_ASYNC: adds some efuns for asyncronous IO */
 #define PACKAGE_ASYNC
@@ -913,5 +986,9 @@
 
 /* use POSIX timers for eval_cost */
 #define POSIX_TIMERS
+
+/* Not sure why this is needed, maybe old MudOS -> FluffOS glue code? */
+#define FLUFFOS
+
 #endif
 
