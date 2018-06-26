@@ -506,6 +506,19 @@
  */
 #define TRAP_CRASHES
 
+/* DROP_CORE: define this if you want the driver to attempt to create
+ *   a core file when it crashes via the crash_MudOS() function.  This
+ *   define only has an affect if -DDEBUG isn't defined in the makefile
+ *   (except for the SIGINT and SIGTERM signals which are always trapped).
+ *
+ * [NOTE: keep this undefined for now since it seems to hang some machines
+ *  upon crashing (some DECstations apparently).  If you want to get a core
+ *  file, undef'ing TRAP_CRASHES should work.]
+ *
+ * This is almost certainly broken.
+ */
+#undef DROP_CORE
+
 /* THIS_PLAYER_IN_CALL_OUT: define this if you wish this_player() to be
  *   usable from within call_out() callbacks.
  */
@@ -991,4 +1004,3 @@
 #define FLUFFOS
 
 #endif
-
