@@ -25,7 +25,7 @@ int external_start (int which, svalue_t * args,
 	if (socketpair(PF_UNIX, SOCK_STREAM, 0, sv) == -1)
 		return EESOCKET;
 
-	ret = fork();
+	ret = vfork();
 	if (ret == -1) {
 		error("fork() in external_start() failed: %s\n", strerror(errno));
 	}
@@ -77,7 +77,9 @@ int external_start (int which, svalue_t * args,
 			}
 		}
 
-		argv = CALLOCATE(n+1, char *, TAG_TEMPORARY, "external args");
+		argv = alloca((n+1)*sizeof(char *));
+		memset(argv,0,(n+1)*sizeof(char *));
+		//argv = CALLOCATE(n+1, char *, TAG_TEMPORARY, "external args");
 
 		argv[0] = cmd;
 
@@ -87,11 +89,14 @@ int external_start (int which, svalue_t * args,
 			svalue_t *sv = args->u.arr->item;
 
 			for (j = 0; j < n; j++) {
-				argv[i++] = alloc_cstring(sv[j].u.string, "external args");
+				//argv[i++] = alloc_cstring(sv[j].u.string, "external args");
+				argv[i++] = (char *)sv[j].u.string;
 			}
 		} else {
 			flag = 1;
-			arg = alloc_cstring(args->u.string, "external args");
+			//arg = alloc_cstring(args->u.string, "external args");
+			arg = alloca(strlen(args->u.string)+1);
+			strcpy(arg, args->u.string); 
 			while (*arg) {
 				if (isspace(*arg)) {
 					*arg = 0;
@@ -114,7 +119,7 @@ int external_start (int which, svalue_t * args,
 		dup2(sv[1], 0);
 		dup2(sv[1], 1);
 		dup2(sv[1], 2);
-		execv(cmd, argv);
+		execve(cmd, argv, environ);
 		exit(0);
 		return 0;
 	}

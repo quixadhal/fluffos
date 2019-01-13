@@ -1223,7 +1223,7 @@ char *string_print_formatted (const char * format_str, int argc, svalue_t * argv
                 } else if (finfo & INFO_T_INT) {        /* one of the integer
                                                          * types */
                     char cheat[20];
-                    char temp[100];
+                    char temp[1200];
 
                     *cheat = '%';
                     i = 1;

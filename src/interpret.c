@@ -1279,7 +1279,8 @@ void pop_control_stack()
 		  set_eval(max_cost);
 	  save_command_giver(stuff->tp.u.ob);
 	  playerchanged = 0;
-	  safe_call_efun_callback(&ftc, 0);
+          if(ftc.ob || (ftc.f.fp->hdr.owner && !(ftc.f.fp->hdr.owner->flags & O_DESTRUCTED)))
+	          safe_call_efun_callback(&ftc, 0);
 	  object_t *cgo = command_giver;
 	  restore_command_giver();
 	  if(playerchanged)

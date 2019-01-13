@@ -99,22 +99,24 @@ void free_stuff(struct stuff *stuff){
 }
 
 pthread_mutex_t mut;
+pthread_cond_t cond;
 pthread_mutex_t work_mut;
 int thread_started = 0;
 
 void *thread_func(void *mydata){
 	while(1){
-		pthread_mutex_lock(&mut);
-		while(todo){
-			pthread_mutex_lock(&work_mut);
+		pthread_cond_wait(&cond, &mut);
+		pthread_mutex_lock(&work_mut);
+		while(todo) {
 			struct stuff *work = todo;
 			todo = todo->next;
 			if(!todo)
 				lasttodo = NULL;
-			pthread_mutex_unlock(&work_mut);
 			work->func(work->data);
 			free_stuff(work);
 		}
+                pthread_mutex_unlock(&work_mut);
+                pthread_mutex_unlock(&mut);
 	}
 }
 
@@ -123,7 +125,6 @@ void do_stuff(void *(*func)(struct request *), struct request *data){
 		pthread_mutex_init(&mut, NULL);
 		pthread_mutex_init(&mem_mut, NULL);
 		pthread_mutex_init(&work_mut, NULL);
-		pthread_mutex_lock(&mut);
 		pthread_t t;
 		pthread_create(&t, NULL, &thread_func, NULL);
 		thread_started = 1;
@@ -141,7 +142,7 @@ void do_stuff(void *(*func)(struct request *), struct request *data){
 		todo = lasttodo = work;
 	}
 	pthread_mutex_unlock(&work_mut);
-	pthread_mutex_unlock(&mut);
+	pthread_cond_signal(&cond);
 }
 
 function_to_call_t *get_cb(){

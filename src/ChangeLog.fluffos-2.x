@@ -2,6 +2,14 @@ As MudOS is moving too slow to keep our driver hacks apart, we now call our own
 FluffOS :), note: where it says Cratylus, I got it from his version, usually
 someone else did the work, but I don't know how to find who did what there.
 
+FluffOS 2.28
+Fixed memory leak in compress()
+Fixed slowdown in external commands
+Fixed async io crasher
+Fixed crashers in pluralize and replace_string
+extra check in test_load for surviving loaded objects
+Some things I can't quite remember
+
 FluffOS 2.27
 Fixed Changelog name for 2.26
 fix incorrect sha1() hashes  (Voltara <voltara@gmail.com>)

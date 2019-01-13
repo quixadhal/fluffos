@@ -2626,7 +2626,7 @@ f_replace_string (void)
         if (plen > 1) {
             while (src < flimit) {
                 if ((skip = skip_table[(unsigned char)src[probe]])) {
-                    for (climit = dst2 + skip; dst2 < climit; *dst2++ = *src++)
+                    for (climit = dst2 + skip; dst2 < climit; dlen++, *dst2++ = *src++)
                         ;
 
                 } else if (memcmp(src, pattern, plen) == 0) {

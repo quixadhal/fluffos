@@ -919,6 +919,7 @@ static int pcre_cache_pattern(struct pcre_cache_t *table, pcre *cpat, svalue_t *
 					tmp = tmp->next;
 				if(tmp == table->buckets[bucket]){//if the hash version works, most of the time
 					pcre_free(tmp->compiled_pattern);
+					free_svalue(&tmp->pattern, "pcre_cache_free1");
 					FREE(tmp);
 					table->buckets[bucket] = NULL;
 				} else {
@@ -926,6 +927,7 @@ static int pcre_cache_pattern(struct pcre_cache_t *table, pcre *cpat, svalue_t *
 					tmp2 = table->buckets[bucket];
 					while(tmp2->next != tmp)
 						tmp2 = tmp2->next; //shouldn't get here often
+					free_svalue(&tmp->pattern, "pcre_cache_free2");
 					pcre_free(tmp->compiled_pattern);
 					FREE(tmp);
 					tmp2->next = NULL;

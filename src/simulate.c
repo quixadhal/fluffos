@@ -422,6 +422,9 @@ object_t *int_load_object (const char * lname, int callcreate)
         if (comp_flag) {
             debug_message(" compiling /%s ...", real_name);
         }
+
+	set_eval(max_cost);
+
         f = open(real_name, O_RDONLY);
         if (f == -1) {
             debug_perror("compile_file", real_name);
@@ -485,7 +488,7 @@ object_t *int_load_object (const char * lname, int callcreate)
          * -Beek
          */
         if (!(ob = lookup_object_hash(name))) {
-            ob = load_object(name, 0);
+            ob = int_load_object(name, callcreate);
             /* sigh, loading the inherited file removed us */
             if (!ob) {
                 num_objects_this_thread--;

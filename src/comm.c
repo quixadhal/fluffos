@@ -1552,7 +1552,7 @@ static void get_user_data (interactive_t * ip)
 				int left = ip->ws_size;
 				if(left > ip->ws_text_end-ip->ws_text_start)
 					left = ip->ws_text_end-ip->ws_text_start;
-				if(left){
+				if(left && (left != ip->ws_size -1)){
 					ip->ws_maskoffs = left;
 					dest[i] = wdata[i]^ip->ws_mask;
 					num_bytes += left;

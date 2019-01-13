@@ -1014,7 +1014,7 @@ static char *pluralize (const char * str) {
 	if (!sz) return 0;
 
 	/* if it is of the form 'X of Y', pluralize the 'X' part */
-	if ((p = strstr(str, " of "))) {
+	if ((p = strstr(str, " of ")) || (p = strstr(str, " Of "))) {
 		of_buf = alloc_cstring(p, "pluralize: of");
 		of_len = strlen(of_buf);
 		sz = p - str;
@@ -1025,7 +1025,7 @@ static char *pluralize (const char * str) {
 	 * They can have 'the' so don't remove that
 	 */
 	if (str[0] == 'a' || str[0] == 'A') {
-		if (str[1] == ' ') {
+		if (str[1] == ' ' && sz > 2) {
 			plen = sz - 2;
 			pre = (char *)DXALLOC(plen + 1, TAG_TEMPORARY, "pluralize: pre");
 			strncpy(pre, str + 2, plen);
@@ -2961,22 +2961,29 @@ void f_classes() {
 #endif
 
 #ifdef F_TEST_LOAD
-const char *saved_extra_name;
-object_t *testloadob;
 static void fix_object_names() {
+	const char *saved_extra_name = sp->u.string;
+	object_t *new_ob = find_object2(saved_extra_name);
+	if(new_ob)
+		destruct_object(new_ob);
+
+	object_t *testloadob = (sp-1)->u.ob;
 	if(testloadob)
 		SETOBNAME(testloadob, saved_extra_name);
 }
 
 void f_test_load(){
 	const char *tmp = sp->u.string;
-	object_t *new_ob, *tmp_ob;
+	object_t *new_ob, *tmp_ob, *testloadob;
 	if(testloadob = find_object2(sp->u.string)){
 		tmp = testloadob->obname;
 		SETOBNAME(testloadob, "");
-
+		push_object(testloadob);
+		push_number((long)tmp);
+	} else {
+		push_number(0);
+		push_number((long)tmp);
 	}
-	saved_extra_name = tmp;
 	STACK_INC;
 	sp->type = T_ERROR_HANDLER;
 	sp->u.error_handler = fix_object_names;
@@ -2987,16 +2994,16 @@ void f_test_load(){
 		if(testloadob)
 			SETOBNAME(testloadob, tmp);
 		sp--;
-		pop_stack();
+		pop_3_elems();
 		push_number(0);
 		return;
 	}
 	destruct_object(new_ob);
 	sp--;
-	pop_stack();
+	pop_3_elems();
 	push_number(1);
 	if(testloadob)
-		SETOBNAME(testloadob, saved_extra_name);
+		SETOBNAME(testloadob, tmp);
 }
 
 #endif
