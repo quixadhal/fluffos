@@ -151,25 +151,20 @@ if test "${MAKE-x}" = "x"; then
         make nothing
         if test $? -eq 0; then
             MAKE=make
-            tmp=`make which_makefile 2>./2.out | grep -v echo`
-            if test "x$tmp" = "xMakeIsGNU"; then
-                MAKEFILE=GNUmakefile
-            else
-                MAKEFILE=Makefile
-		OBJDIR=
-            fi
         else
             echo 'FATAL ERROR: Cannot find make or gmake'
             exit
         fi
     fi
-else
-    tmp=`make which_makefile 2>./2.out | grep -v echo`
-    if test "x$tmp" = "xMakeIsGNU"; then
+fi
+
+if test "${MAKEFILE-x}" = "x"; then
+    tmp=`$MAKE --version 2>2.out | head -1 | cut -c -8`
+    if test "x$tmp" = "xGNU Make"; then
         MAKEFILE=GNUmakefile
     else
         MAKEFILE=Makefile
-	OBJDIR=
+        OBJDIR=
     fi
 fi
 
