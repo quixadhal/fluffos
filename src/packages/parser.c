@@ -1251,7 +1251,7 @@ static int get_single (bitvec_t * bv) {
 static char *query_the_short (char * start, char * end, object_t * ob) {
     svalue_t *ret;
 
-    if (ob==NULL || ob==0x9 || ob==0x0) return strput(start, end, "the thing");
+    if (ob==NULL || ob==(object_t *)0x9) return strput(start, end, "the thing");
     if((ob->flags & O_DESTRUCTED) ||
         (!(ret = apply("the_short", ob, 0, ORIGIN_DRIVER)))
         || (ret->type != T_STRING)) {
@@ -1911,7 +1911,7 @@ static int make_function (char * buf, char * end, int which,
                 push_number(0);
             } else if (loaded_objects[matches[match].val.number] == NULL ||
                 loaded_objects[matches[match].val.number] == 0x0 ||
-                loaded_objects[matches[match].val.number] == 0x9 ||
+                loaded_objects[matches[match].val.number] == (object_t *)0x9 ||
                 loaded_objects[matches[match].val.number]->flags & O_DESTRUCTED) {
                 push_number(0);
             } else 
@@ -2028,7 +2028,7 @@ static int parallel_check_functions (object_t * obj,
     int tryy, ret, args;
 
     free_parser_error(&parallel_error_info);
-    if(obj && obj != 0x9){
+    if(obj && obj != (object_t *)0x9){
         SET_OB(obj);
         for (tryy = 0, ret = 0; !ret && tryy < 8; tryy++) {
             if (tryy == 4)

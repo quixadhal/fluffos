@@ -27,3 +27,13 @@ option_defs.c
 portbind
 system_libs
 y.tab.c
+a.out
+comptest
+comptest.a
+comptest.c
+comptest.o
+comptest.tab.c
+comptest.y
+insttest
+local_options
+options_incl.h

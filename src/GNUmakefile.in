@@ -80,6 +80,7 @@ $(OBJDIR)/grammar.tab.o: grammar.tab.c opcodes.h
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
+	-echo '*.o' >$(OBJDIR)/.gitignore
 
 which_makefile:
 	echo MakeIsGNU
@@ -158,6 +159,9 @@ configure.h: edit_source build.FluffOS
 	    echo "Machine `uname -a` Configure version 5" > configuration; \
 	fi
 
+local_options: options.h
+	cp -p options.h local_options
+
 $(OBJDIR)/edit_source.o: edit_source.c preprocess.c cc.h
 
 edit_source: $(OBJDIR)/edit_source.o $(OBJDIR)/hash.o $(OBJDIR)/make_func.tab.o
@@ -204,6 +208,8 @@ spotless: clean
 neat:
 	-(cd packages; $(MAKE) "A=$(A)" "O=$(O)" clean)
 	-rm -rf $(OBJDIR) *.$(O) *.tab.c *.tab.h
+	-mkdir $(OBJDIR)
+	-echo '*.o' >$(OBJDIR)/.gitignore
 	-rm -f efun_defs.c option_defs.c
 	-rm -f opcodes.h efunctions.h opc.h efun_protos.h
 	-rm -f malloc.c mallocwrapper.c
