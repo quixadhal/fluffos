@@ -1689,8 +1689,10 @@ static void handle_configure() {
         check_library("-lssl");
     if (lookup_define("PACKAGE_PCRE"))
         check_library("-lpcre");
-    if (lookup_define("PACKAGE_CRYPTO"))
+    if (lookup_define("PACKAGE_CRYPTO")) {
         check_library("-lcrypto");
+	check_library("-lssl");
+	}
     if (lookup_define("POSIX_TIMERS"))
         check_library("-lrt");
     fprintf(stderr, "Checking for flaky Linux systems ...\n");
