@@ -232,6 +232,7 @@ clean: neat
 	-find . -name "*.rej" -print | xargs rm
 	-rm -f *.ln tags TAGS
 	-rm -f $(DRIVER_BIN) $(DRIVER_BIN).old addr_server portbind *.exe
+	-rm -f configure.h system_libs
 	-rm -f Dependencies tmpdepend
 	-touch Dependencies
 
