@@ -1446,8 +1446,6 @@ array_t *socket_status (int which)
     ret->item[4].u.string = string_copy(inet_address(&lpc_socks[which].r_addr),
                                         "socket_status");
 
-    // Fix per Kalinash's suggestion, if (!(lpc_socks[which].flags & STATE_FLUSHING) && ...
-    // I'm changing it from != back to & and now socket_status tells me the object correctly again.
     if (!(lpc_socks[which].flags & STATE_FLUSHING) && lpc_socks[which].owner_ob && !(lpc_socks[which].owner_ob->flags & O_DESTRUCTED)) {
         ret->item[5].type = T_OBJECT;
         ret->item[5].u.ob = lpc_socks[which].owner_ob;
